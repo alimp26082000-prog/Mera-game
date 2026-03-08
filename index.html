@@ -1,215 +1,164 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WinGold Pro - Admin Console</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <style>
-        :root { --gold: #f1c40f; --dark: #061118; --card: #152026; --green: #2ecc71; --red: #e74c3c; --violet: #9b59b6; --blue: #3498db; }
-        body { font-family: sans-serif; background: var(--dark); color: white; margin: 0; padding: 0; text-align: center; }
-        .card { background: var(--card); margin: 10px; padding: 15px; border-radius: 15px; border: 1px solid #333; }
-        .balance-card { background: linear-gradient(135deg, #1e3c72, #2a5298); padding: 25px; border-radius: 0 0 25px 25px; }
-        .balance-amt { font-size: 32px; font-weight: bold; color: var(--gold); cursor: pointer; }
-        .place-order-btn { width: 100%; padding: 15px; background: var(--gold); color: black; border: none; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 10px; }
-        .color-btn { width: 30%; padding: 15px; border-radius: 10px; border: none; color: white; font-weight: bold; cursor: pointer; }
-        
-        /* Admin Panel Styles */
-        #adminPanel { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #061118; z-index: 9999; overflow-y: auto; padding: 20px; text-align: left; box-sizing: border-box; }
-        .req-card { background: #1a262f; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid var(--gold); }
-        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; background: #000; }
-        th, td { padding: 10px; border-bottom: 1px solid #222; text-align: center; }
-        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-    </style>
-</head>
-<body>
-
-<div id="loginBox" class="card" style="margin-top:100px;">
-    <h1 style="color:var(--gold)">WinGold</h1>
-    <input type="number" id="phone" placeholder="Mobile Number" style="width:90%; padding:15px; border-radius:10px; border:1px solid #333; background:#000; color:white;">
-    <button onclick="login()" class="place-order-btn">LOGIN</button>
-</div>
-
-<div id="gameBox" style="display:none;">
-    <div class="balance-card">
-        <span>Total Balance</span><br>
-        <span class="balance-amt" id="userBalance" onclick="handleAdminTap()">₹0.00</span>
-        <div style="margin-top:15px; display:flex; justify-content:center; gap:10px;">
-            <button onclick="showPop('depSec')" style="background:var(--green); border:none; color:white; padding:10px 20px; border-radius:8px;">Deposit</button>
-            <button onclick="showPop('wdSec')" style="background:var(--red); border:none; color:white; padding:10px 20px; border-radius:8px;">Withdraw</button>
-        </div>
-    </div>
-
-    <div class="card">
-        <p>Period: <b id="periodId">--</b> | Time: <b id="secs" style="color:var(--red)">60</b>s</p>
-        <div style="display:flex; justify-content:space-around; margin-bottom:15px;">
-            <button class="color-btn" style="background:var(--green)" onclick="selColor('Green')">Green</button>
-            <button class="color-btn" style="background:var(--violet)" onclick="selColor('Violet')">Violet</button>
-            <button class="color-btn" style="background:var(--red)" onclick="selColor('Red')">Red</button>
-        </div>
-        <input type="number" id="betAmt" placeholder="Amount (₹)" style="width:90%; padding:12px; background:#000; color:white; border-radius:8px; border:1px solid #333;">
-        <button class="place-order-btn" onclick="placeOrder()">PLACE ORDER</button>
-    </div>
-
-    <div class="card">
-        <h4 style="text-align:left; color:var(--gold);">📊 Game History</h4>
-        <table>
-            <thead><tr><th>Period</th><th>Num</th><th>Result</th></tr></thead>
-            <tbody id="historyBody"></tbody>
-        </table>
-    </div>
-</div>
-
-<div id="adminPanel">
-    <h2 style="color:var(--gold);text-align:center;">ADMIN PANEL</h2>
-    <div style="display:flex;gap:10px;margin-bottom:20px;">
-        <button onclick="showAdminTab('dep')" class="tab-btn" style="background:var(--green)">Deposits</button>
-        <button onclick="showAdminTab('wd')" class="tab-btn" style="background:var(--red)">Withdrawals</button>
-        <button onclick="showAdminTab('sup')" class="tab-btn" style="background:var(--blue)">Support</button>
-    </div>
-
-    <div id="adminDeposits"></div>
-    <div id="adminWithdrawals" style="display:none"></div>
-    <div id="adminSupport" style="display:none"></div>
-
-    <button onclick="document.getElementById('adminPanel').style.display='none'" class="place-order-btn" style="background:white;color:black;">Close</button>
-</div>
-
 <script>
-    const firebaseConfig = { databaseURL: "https://vlog-trading-default-rtdb.firebaseio.com/" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+const firebaseConfig = { databaseURL: "https://vlog-trading-default-rtdb.firebaseio.com/" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-    let user, balance, selCol, tapCount = 0;
-    let period = 20260308001, timer = 60;
+let user, balance, selCol, tapCount = 0;
+let period = 20260308001, timer = 60;
+let currentOrder = null;
 
-    function login() {
-        user = document.getElementById('phone').value;
-        if(user.length < 10) return alert("Invalid Number");
-        document.getElementById('loginBox').style.display='none';
-        document.getElementById('gameBox').style.display='block';
-        loadData(); startTimer();
-    }
+function login() {
+    user = document.getElementById('phone').value;
+    if(user.length < 10) return alert("Invalid Number");
+    document.getElementById('loginBox').style.display='none';
+    document.getElementById('gameBox').style.display='block';
+    loadData(); 
+    startTimer();
+}
 
-    function startTimer() {
-        setInterval(() => {
-            timer--;
-            if(timer <= 0) { calculateResult(); timer = 60; period++; }
-            document.getElementById('secs').innerText = timer;
-            document.getElementById('periodId').innerText = period;
-        }, 1000);
-    }
-
-    function loadData() {
-        db.ref('users/'+user).on('value', s => {
-            balance = s.val() ? (s.val().balance || 0) : 0;
-            document.getElementById('userBalance').innerText = "₹" + balance.toFixed(2);
-        });
-
-        // HISTORY FIX
-        db.ref('gameHistory').limitToLast(20).on('value', snap => {
-            let html = ""; let list = [];
-            snap.forEach(x => { list.unshift(x.val()); });
-            list.forEach(r => {
-                let color = r.color === 'Red' ? 'var(--red)' : (r.color === 'Green' ? 'var(--green)' : 'var(--violet)');
-                html += `<tr><td>${r.period}</td><td>${r.num}</td><td><span class="dot" style="background:${color}"></span>${r.color}</td></tr>`;
-            });
-            document.getElementById('historyBody').innerHTML = html || "<tr><td colspan='3'>Results Loading...</td></tr>";
-        });
-    }
-
-    function selColor(c) { selCol = c; alert("Selected: " + c); }
-
-    function placeOrder() {
-        let amt = parseInt(document.getElementById('betAmt').value);
-        if(!selCol || isNaN(amt) || balance < amt) return alert("Select color or check balance!");
-        db.ref('users/'+user).update({ balance: balance - amt });
-        db.ref('currentBets/'+selCol).transaction(c => (c || 0) + amt);
-        alert("Order Placed!");
-    }
-
-    async function calculateResult() {
-        let bets = (await db.ref('currentBets').once('value')).val() || {Green:0, Red:0, Violet:0};
-        let winner = (bets.Red <= bets.Green && bets.Red <= bets.Violet) ? "Red" : (bets.Violet <= bets.Green ? "Violet" : "Green");
-        let num = Math.floor(Math.random()*10);
-        db.ref('gameHistory').push({period: period, color: winner, num: num});
-        db.ref('currentBets').set({Green:0, Red:0, Violet:0});
-    }
-
-    // --- YOUR ADMIN FUNCTIONS ---
-    function handleAdminTap() {
-        tapCount++;
-        if(tapCount === 3) {
-            if(prompt("Admin Pass:") === "786786") {
-                document.getElementById('adminPanel').style.display='block';
-                loadAdmin();
-            }
-            tapCount = 0;
+function startTimer() {
+    setInterval(() => {
+        timer--;
+        if(timer <= 0) { 
+            calculateResult(); 
+            timer = 60; 
+            period++; 
         }
+        document.getElementById('secs').innerText = timer;
+        document.getElementById('periodId').innerText = period;
+    }, 1000);
+}
+
+function loadData() {
+
+    db.ref('users/'+user).on('value', s => {
+        balance = s.val() ? (s.val().balance || 0) : 0;
+        document.getElementById('userBalance').innerText = "₹" + balance.toFixed(2);
+    });
+
+    // LAST 20 RESULT SHOW
+    db.ref('gameHistory').limitToLast(20).on('value', snap => {
+        let html = "";
+        let list = [];
+
+        snap.forEach(x => { list.unshift(x.val()); });
+
+        list.forEach(r => {
+
+            let color = r.color === 'Red' ? 'var(--red)' :
+                       (r.color === 'Green' ? 'var(--green)' : 'var(--violet)');
+
+            html += `<tr>
+                        <td>${r.period}</td>
+                        <td><b style="color:var(--gold)">${r.num}</b></td>
+                        <td><span class="dot" style="background:${color}"></span>${r.color}</td>
+                     </tr>`;
+        });
+
+        document.getElementById('historyBody').innerHTML = html || "<tr><td colspan='3'>History Loading...</td></tr>";
+    });
+
+}
+
+function selColor(c) {
+    selCol = c;
+    alert("Selected: " + c);
+}
+
+function placeOrder() {
+
+    let amt = parseInt(document.getElementById('betAmt').value);
+
+    if(!selCol || isNaN(amt) || balance < amt) 
+        return alert("Select color or check balance!");
+
+    db.ref('users/'+user).update({
+        balance: balance - amt
+    });
+
+    db.ref('currentBets/'+selCol).transaction(c => (c || 0) + amt);
+
+    currentOrder = { color: selCol, amt: amt };
+
+    alert("Order Placed Successfully!");
+
+    document.getElementById('betAmt').value = "";
+}
+
+async function calculateResult() {
+
+    let bets = (await db.ref('currentBets').once('value')).val() || {Green:0, Red:0, Violet:0};
+
+    let winner = "Green";
+
+    if(bets.Red <= bets.Green && bets.Red <= bets.Violet) {
+        winner = "Red";
+    } 
+    else if(bets.Violet <= bets.Green && bets.Violet <= bets.Red) {
+        winner = "Violet";
     }
 
-    function showAdminTab(tab){
-        document.getElementById("adminDeposits").style.display="none";
-        document.getElementById("adminWithdrawals").style.display="none";
-        document.getElementById("adminSupport").style.display="none";
-        if(tab=="dep") document.getElementById("adminDeposits").style.display="block";
-        if(tab=="wd") document.getElementById("adminWithdrawals").style.display="block";
-        if(tab=="sup") document.getElementById("adminSupport").style.display="block";
+    let num = (winner === "Green") ? 
+        [1,3,7,9][Math.floor(Math.random()*4)] :
+        (winner === "Red") ? 
+        [2,4,6,8][Math.floor(Math.random()*4)] : 5;
+
+    // RESULT SAVE
+    let newResult = db.ref('gameHistory').push();
+
+    await newResult.set({
+        period: period,
+        color: winner,
+        num: num,
+        timestamp: Date.now()
+    });
+
+    // ONLY KEEP LAST 20 RESULTS
+    let snap = await db.ref('gameHistory').once('value');
+
+    if(snap.numChildren() > 20){
+
+        let removeCount = snap.numChildren() - 20;
+        let i = 0;
+
+        snap.forEach(child => {
+
+            if(i < removeCount){
+                db.ref('gameHistory/'+child.key).remove();
+                i++;
+            }
+
+        });
+
     }
 
-    function loadAdmin() {
-        // Deposit
-        db.ref("admin/deposits").on("value", snap => {
-            let html = "";
-            snap.forEach(d => {
-                let r = d.val();
-                html += `<div class="req-card">User: ${r.user}<br>Amt: ₹${r.amt}<br>UTR: ${r.utr}<br><button onclick="approveDep('${d.key}','${r.user}',${r.amt})" style="background:green;color:white;padding:10px;border:none;border-radius:6px;width:100%;margin-top:10px;">Approve</button></div>`;
+    // WIN / LOSS
+
+    if(currentOrder) {
+
+        if(currentOrder.color === winner) {
+
+            let winAmt = currentOrder.amt * 1.9;
+
+            db.ref('users/'+user).transaction(u => {
+                if(u) u.balance = (u.balance || 0) + winAmt;
+                return u;
             });
-            document.getElementById("adminDeposits").innerHTML = html || "No Requests";
-        });
 
-        // Withdrawal
-        db.ref("admin/withdrawals").on("value", snap => {
-            let html = "";
-            snap.forEach(w => {
-                let r = w.val();
-                html += `<div class="req-card">User: ${r.user}<br>Amt: ₹${r.amt}<br>UPI: ${r.upi}<br><button onclick="approveWithdraw('${w.key}')" style="background:red;color:white;padding:10px;border:none;border-radius:6px;width:100%;margin-top:10px;">Mark Successful</button></div>`;
-            });
-            document.getElementById("adminWithdrawals").innerHTML = html || "No Withdrawals";
-        });
+            alert("🎉 CONGRATULATIONS! You Won ₹" + winAmt.toFixed(2));
 
-        // Support
-        db.ref("support").on("value", snap => {
-            let html = "";
-            snap.forEach(u => {
-                html += `<div class="req-card">User: ${u.key} <button onclick="adminReply('${u.key}')" style="background:#3498db;color:white;padding:8px;border:none;border-radius:6px;float:right;">Open Chat</button></div>`;
-            });
-            document.getElementById("adminSupport").innerHTML = html || "No Messages";
-        });
+        } 
+        else {
+
+            alert("💔 BETTER LUCK NEXT TIME! You Lost.");
+
+        }
+
     }
 
-    function approveDep(key, uid, amt) {
-        db.ref("users/"+uid).transaction(u => {
-            if(!u) u = {balance:0};
-            u.balance = (u.balance || 0) + parseInt(amt);
-            return u;
-        });
-        db.ref("admin/deposits/"+key).remove();
-        alert("Deposit Approved");
-    }
+    db.ref('currentBets').set({Green:0, Red:0, Violet:0});
 
-    function approveWithdraw(key) {
-        db.ref("admin/withdrawals/"+key).remove();
-        alert("Withdrawal Successful");
-    }
+    currentOrder = null;
+}
 
-    function adminReply(uid) {
-        let msg = prompt("Reply to " + uid);
-        if(msg) db.ref("support/"+uid).push({ sender: "Admin", msg: msg });
-    }
 </script>
-</body>
-</html>
