@@ -1,129 +1,175 @@
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script>
-const firebaseConfig = { databaseURL: "https://vlog-trading-default-rtdb.firebaseio.com/" };
+const firebaseConfig = {
+    databaseURL: "https://vlog-trading-default-rtdb.firebaseio.com/"
+};
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let user, balance, selCol, tapCount = 0;
-let period = 20260308001, timer = 60;
+let user;
+let balance = 0;
+let selCol = null;
+let period = 20260308001;
+let timer = 60;
 let currentOrder = null;
 
-function login() {
+function login(){
+
     user = document.getElementById('phone').value;
-    if(user.length < 10) return alert("Invalid Number");
+
+    if(!user || user.length < 10){
+        alert("Invalid Number");
+        return;
+    }
+
     document.getElementById('loginBox').style.display='none';
     document.getElementById('gameBox').style.display='block';
-    loadData(); 
+
+    loadData();
     startTimer();
 }
 
-function startTimer() {
-    setInterval(() => {
+function startTimer(){
+
+    setInterval(function(){
+
         timer--;
-        if(timer <= 0) { 
-            calculateResult(); 
-            timer = 60; 
-            period++; 
+
+        if(timer <= 0){
+            calculateResult();
+            timer = 60;
+            period++;
         }
+
         document.getElementById('secs').innerText = timer;
         document.getElementById('periodId').innerText = period;
-    }, 1000);
+
+    },1000);
+
 }
 
-function loadData() {
+function loadData(){
 
-    db.ref('users/'+user).on('value', s => {
-        balance = s.val() ? (s.val().balance || 0) : 0;
-        document.getElementById('userBalance').innerText = "₹" + balance.toFixed(2);
+    db.ref('users/'+user).on('value',function(s){
+
+        if(s.val()){
+            balance = s.val().balance || 0;
+        }else{
+            balance = 0;
+        }
+
+        document.getElementById('userBalance').innerText = "₹"+balance.toFixed(2);
+
     });
 
-    // LAST 20 RESULT SHOW
-    db.ref('gameHistory').limitToLast(20).on('value', snap => {
+    db.ref('gameHistory').limitToLast(20).on('value',function(snap){
+
         let html = "";
         let list = [];
 
-        snap.forEach(x => { list.unshift(x.val()); });
-
-        list.forEach(r => {
-
-            let color = r.color === 'Red' ? 'var(--red)' :
-                       (r.color === 'Green' ? 'var(--green)' : 'var(--violet)');
-
-            html += `<tr>
-                        <td>${r.period}</td>
-                        <td><b style="color:var(--gold)">${r.num}</b></td>
-                        <td><span class="dot" style="background:${color}"></span>${r.color}</td>
-                     </tr>`;
+        snap.forEach(function(x){
+            list.unshift(x.val());
         });
 
-        document.getElementById('historyBody').innerHTML = html || "<tr><td colspan='3'>History Loading...</td></tr>";
+        list.forEach(function(r){
+
+            let color = r.color=="Red" ? "red" :
+                        r.color=="Green" ? "green" : "violet";
+
+            html += `<tr>
+            <td>${r.period}</td>
+            <td>${r.num}</td>
+            <td style="color:${color}">${r.color}</td>
+            </tr>`;
+
+        });
+
+        document.getElementById('historyBody').innerHTML = html;
+
     });
 
 }
 
-function selColor(c) {
+function selColor(c){
+
     selCol = c;
-    alert("Selected: " + c);
+    alert("Selected : "+c);
+
 }
 
-function placeOrder() {
+function placeOrder(){
 
     let amt = parseInt(document.getElementById('betAmt').value);
 
-    if(!selCol || isNaN(amt) || balance < amt) 
-        return alert("Select color or check balance!");
+    if(!selCol || !amt || balance < amt){
+        alert("Check color or balance");
+        return;
+    }
 
     db.ref('users/'+user).update({
-        balance: balance - amt
+        balance: balance-amt
     });
 
-    db.ref('currentBets/'+selCol).transaction(c => (c || 0) + amt);
+    db.ref('currentBets/'+selCol).transaction(function(c){
+        return (c||0)+amt;
+    });
 
-    currentOrder = { color: selCol, amt: amt };
+    currentOrder = {color:selCol,amt:amt};
 
-    alert("Order Placed Successfully!");
+    alert("Bet Placed");
 
-    document.getElementById('betAmt').value = "";
 }
 
-async function calculateResult() {
+async function calculateResult(){
 
-    let bets = (await db.ref('currentBets').once('value')).val() || {Green:0, Red:0, Violet:0};
+    let snap = await db.ref('currentBets').once('value');
+
+    let bets = snap.val() || {Green:0,Red:0,Violet:0};
 
     let winner = "Green";
 
-    if(bets.Red <= bets.Green && bets.Red <= bets.Violet) {
-        winner = "Red";
-    } 
-    else if(bets.Violet <= bets.Green && bets.Violet <= bets.Red) {
-        winner = "Violet";
+    if(bets.Red <= bets.Green && bets.Red <= bets.Violet){
+        winner="Red";
+    }
+    else if(bets.Violet <= bets.Green && bets.Violet <= bets.Red){
+        winner="Violet";
     }
 
-    let num = (winner === "Green") ? 
-        [1,3,7,9][Math.floor(Math.random()*4)] :
-        (winner === "Red") ? 
-        [2,4,6,8][Math.floor(Math.random()*4)] : 5;
+    let num;
 
-    // RESULT SAVE
-    let newResult = db.ref('gameHistory').push();
+    if(winner=="Green"){
+        let arr=[1,3,7,9];
+        num=arr[Math.floor(Math.random()*arr.length)];
+    }
+    else if(winner=="Red"){
+        let arr=[2,4,6,8];
+        num=arr[Math.floor(Math.random()*arr.length)];
+    }
+    else{
+        num=5;
+    }
 
-    await newResult.set({
-        period: period,
-        color: winner,
-        num: num,
-        timestamp: Date.now()
+    let newRef=db.ref('gameHistory').push();
+
+    await newRef.set({
+        period:period,
+        color:winner,
+        num:num,
+        time:Date.now()
     });
 
-    // ONLY KEEP LAST 20 RESULTS
-    let snap = await db.ref('gameHistory').once('value');
+    let historySnap = await db.ref('gameHistory').once('value');
 
-    if(snap.numChildren() > 20){
+    if(historySnap.numChildren()>20){
 
-        let removeCount = snap.numChildren() - 20;
-        let i = 0;
+        let removeCount = historySnap.numChildren()-20;
+        let i=0;
 
-        snap.forEach(child => {
+        historySnap.forEach(function(child){
 
-            if(i < removeCount){
+            if(i<removeCount){
                 db.ref('gameHistory/'+child.key).remove();
                 i++;
             }
@@ -132,33 +178,38 @@ async function calculateResult() {
 
     }
 
-    // WIN / LOSS
+    if(currentOrder){
 
-    if(currentOrder) {
+        if(currentOrder.color==winner){
 
-        if(currentOrder.color === winner) {
+            let winAmt=currentOrder.amt*1.9;
 
-            let winAmt = currentOrder.amt * 1.9;
+            db.ref('users/'+user).transaction(function(u){
 
-            db.ref('users/'+user).transaction(u => {
-                if(u) u.balance = (u.balance || 0) + winAmt;
+                if(u){
+                    u.balance=(u.balance||0)+winAmt;
+                }
+
                 return u;
+
             });
 
-            alert("🎉 CONGRATULATIONS! You Won ₹" + winAmt.toFixed(2));
+            alert("You Won ₹"+winAmt);
 
-        } 
-        else {
-
-            alert("💔 BETTER LUCK NEXT TIME! You Lost.");
-
+        }
+        else{
+            alert("You Lost");
         }
 
     }
 
-    db.ref('currentBets').set({Green:0, Red:0, Violet:0});
+    db.ref('currentBets').set({
+        Green:0,
+        Red:0,
+        Violet:0
+    });
 
-    currentOrder = null;
+    currentOrder=null;
+
 }
-
-</script>
+    </script>
