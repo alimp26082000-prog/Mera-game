@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WinGold Pro - Admin Elite</title>
+    <title>WinGold Pro - Fast Login</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -13,51 +13,57 @@
         .balance-card { background: linear-gradient(135deg, #1e3c72, #2a5298); padding: 25px; border-radius: 0 0 25px 25px; }
         .balance-amt { font-size: 32px; font-weight: bold; color: var(--gold); cursor: pointer; }
         .btn-bet { width: 30%; padding: 15px; border-radius: 10px; border: none; font-weight: bold; color: white; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th, td { padding: 10px; border-bottom: 1px solid #222; }
-        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; background: #000; }
+        th, td { padding: 12px; border-bottom: 1px solid #222; }
+        .dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--gold); z-index: 1000; width: 85%; max-width: 400px; box-shadow: 0 0 100px #000; }
-        input { width: 90%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: white; }
+        input { width: 90%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: white; font-size: 16px; }
         
-        /* Admin Styling */
+        /* Admin Section */
         #adminPanel { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; overflow-y: auto; padding: 20px; text-align: left; }
-        .admin-item { background: #1a1a1a; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--gold); }
-        .admin-btn { background: var(--green); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .admin-item { background: #222; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid var(--gold); }
+        .admin-btn { background: var(--green); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-<div id="loginBox" class="card" style="margin-top:50px;">
-    <h1 style="color:var(--gold)">WinGold Pro</h1>
-    <input type="number" id="phone" placeholder="Mobile Number">
-    <input type="password" id="pin" placeholder="Security PIN (Last 5 Digits)">
-    <button onclick="login()" style="width:90%; padding:15px; background:var(--gold); border:none; border-radius:10px; font-weight:bold;">ENTER GAME</button>
+<div id="loginBox" style="height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;">
+    <div class="card" style="width: 100%; max-width: 350px; padding: 30px;">
+        <h1 style="color:var(--gold); margin-bottom: 5px;">WinGold Pro</h1>
+        <p style="color: #888; margin-bottom: 30px;">Enter Mobile to Start Game</p>
+        
+        <input type="number" id="phone" placeholder="Enter Mobile Number">
+        <button onclick="login()" style="width:100%; padding:15px; background:var(--gold); border:none; border-radius:10px; font-weight:bold; font-size: 16px; cursor: pointer; margin-top: 10px;">LOGIN</button>
+    </div>
 </div>
 
 <div id="gameBox" style="display:none;">
     <div class="balance-card">
-        <span style="opacity:0.8;">Wallet Balance</span><br>
+        <span style="opacity:0.8;">Total Balance</span><br>
         <span class="balance-amt" id="userBalance" onclick="handleAdminTap()">₹0.00</span>
-        <div style="margin-top:15px;">
-            <button onclick="showPop('depSec')" style="background:var(--green); border:none; color:white; padding:10px 20px; border-radius:8px;">Deposit</button>
-            <button onclick="showPop('wdSec')" style="background:var(--red); border:none; color:white; padding:10px 20px; border-radius:8px;">Withdraw</button>
+        <div style="margin-top:15px; display: flex; justify-content: center; gap: 10px;">
+            <button onclick="showPop('depSec')" style="background:var(--green); border:none; color:white; padding:10px 25px; border-radius:10px; font-weight:bold;">Deposit</button>
+            <button onclick="showPop('wdSec')" style="background:var(--red); border:none; color:white; padding:10px 25px; border-radius:10px; font-weight:bold;">Withdraw</button>
         </div>
     </div>
 
     <div class="card">
-        <p>Period: <b id="periodId" style="color:var(--gold)">--</b> | Time: <b id="secs" style="color:var(--red)">60</b>s</p>
-        <div style="display:flex; justify-content:space-around;">
+        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px;">
+            <span>Period: <b id="periodId" style="color:var(--gold)">--</b></span>
+            <span>Time: <b id="secs" style="color:var(--red)">60</b>s</span>
+        </div>
+        <div style="display:flex; justify-content:space-around; margin-bottom: 15px;">
             <button class="btn-bet" style="background:var(--green)" onclick="openBet('Green')">Green</button>
             <button class="btn-bet" style="background:var(--violet)" onclick="openBet('Violet')">Violet</button>
             <button class="btn-bet" style="background:var(--red)" onclick="openBet('Red')">Red</button>
         </div>
-        <button onclick="showPop('suppSec')" style="width:100%; margin-top:15px; background:#444; color:white; border:none; padding:12px; border-radius:10px;">Customer Support</button>
+        <button onclick="window.open('https://wa.me/91XXXXXXXXXX')" style="width:100%; background: #25D366; color:white; border:none; padding:12px; border-radius:10px; font-weight: bold;">WhatsApp Support</button>
     </div>
 
     <div class="card">
-        <h4 style="text-align:left; color:var(--gold);">📊 Game History (Last 20)</h4>
+        <h4 style="text-align:left; color:var(--gold); margin-top: 0;">📊 Recent 20 Results</h4>
         <table>
-            <thead><tr><th>Period</th><th>Num</th><th>Result</th></tr></thead>
+            <thead><tr><th>Period</th><th>Num</th><th>Color</th></tr></thead>
             <tbody id="historyBody"></tbody>
         </table>
     </div>
@@ -65,44 +71,38 @@
 
 <div id="adminPanel">
     <h2 style="color:var(--gold)">MASTER ADMIN</h2>
-    <div id="adminContent">
-        <div id="adminDeps"><h3>Deposits</h3><div id="depList"></div></div>
-        <div id="adminWds"><h3>Withdrawals</h3><div id="wdList"></div></div>
-        <div id="adminChats"><h3>Support Messages</h3><div id="chatList"></div></div>
+    <div id="adminArea">
+        <h3 style="color:var(--green)">Deposits</h3>
+        <div id="depList"></div>
+        <h3 style="color:var(--red); margin-top: 20px;">Withdrawals</h3>
+        <div id="wdList"></div>
     </div>
-    <button onclick="document.getElementById('adminPanel').style.display='none'" style="width:100%; padding:15px; margin-top:20px;">BACK TO GAME</button>
+    <button onclick="document.getElementById('adminPanel').style.display='none'" style="width:100%; padding:15px; background:white; color:black; font-weight:bold; border-radius:10px; margin-top: 30px;">CLOSE</button>
 </div>
 
 <div id="betModal" class="popup">
     <h3 id="betTitle">Join</h3>
     <input type="number" id="betAmtInput" value="10">
-    <button onclick="confirmBet()" style="width:100%; padding:15px; background:var(--green); color:white; border:none; border-radius:10px;">CONFIRM BET</button>
+    <button onclick="confirmBet()" style="width:100%; padding:15px; background:var(--green); color:white; border:none; border-radius:10px; font-weight:bold;">CONFIRM</button>
     <button onclick="closePop()" style="background:none; border:none; color:#888; margin-top:10px;">Cancel</button>
 </div>
 
 <div id="depSec" class="popup">
     <h3>Deposit</h3>
-    <p>UPI: <b>Poonamlondhe52-1@okhdfcbank</b></p>
-    <input type="number" id="dAmount" placeholder="Amount">
-    <input type="text" id="dUtr" placeholder="UTR Number">
-    <button onclick="submitDep()" style="width:100%; background:var(--green); border:none; color:white; padding:12px; border-radius:10px;">Submit</button>
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=Poonamlondhe52-1@okhdfcbank&pn=WinGold&cu=INR" style="background:white; padding:10px; border-radius:10px;">
+    <p style="font-size: 13px;">UPI: <b>Poonamlondhe52-1@okhdfcbank</b></p>
+    <input type="number" id="dAmount" placeholder="Amount (₹)">
+    <input type="text" id="dUtr" placeholder="12 Digit UTR Number">
+    <button onclick="submitDep()" style="width:100%; background:var(--green); border:none; color:white; padding:12px; border-radius:10px; font-weight:bold;">SUBMIT</button>
     <button onclick="closePop()" style="background:none; border:none; color:#888; margin-top:10px;">Close</button>
 </div>
 
 <div id="wdSec" class="popup">
     <h3>Withdraw</h3>
     <input type="number" id="wAmount" placeholder="Min ₹200">
-    <input type="text" id="wUpi" placeholder="UPI ID">
-    <button onclick="submitWd()" style="width:100%; background:var(--red); border:none; color:white; padding:12px; border-radius:10px;">Request</button>
+    <input type="text" id="wUpi" placeholder="Enter UPI ID">
+    <button onclick="submitWd()" style="width:100%; background:var(--red); border:none; color:white; padding:12px; border-radius:10px; font-weight:bold;">WITHDRAW</button>
     <button onclick="closePop()" style="background:none; border:none; color:#888; margin-top:10px;">Close</button>
-</div>
-
-<div id="suppSec" class="popup">
-    <h3>Support</h3>
-    <div id="userChatBox" style="height:150px; overflow-y:auto; background:#000; padding:10px; margin-bottom:10px; text-align:left;"></div>
-    <input type="text" id="chatMsg" placeholder="Message...">
-    <button onclick="sendChat()" style="width:100%; background:var(--gold); border:none; padding:10px; border-radius:8px;">Send</button>
-    <button onclick="closePop()" style="background:none; color:#888; border:none; margin-top:10px;">Close</button>
 </div>
 
 <script>
@@ -114,40 +114,40 @@
     let period = 20260308001, timer = 60;
 
     function login() {
-        user = document.getElementById('phone').value;
-        if(user.length < 10) return alert("Enter Number");
+        let p = document.getElementById('phone').value;
+        if(p.length < 10) return alert("Please enter 10 digit number");
+        user = p;
         document.getElementById('loginBox').style.display='none';
         document.getElementById('gameBox').style.display='block';
-        loadData(); startSystem();
+        loadUserData(); startTimer();
     }
 
-    function startSystem() {
+    function startTimer() {
         setInterval(() => {
             timer--;
-            if(timer <= 0) { calculateResult(); timer = 60; period++; }
+            if(timer <= 0) { generateResult(); timer = 60; period++; }
             document.getElementById('secs').innerText = timer;
             document.getElementById('periodId').innerText = period;
         }, 1000);
+        loadHistory();
     }
 
-    function loadData() {
+    function loadUserData() {
         db.ref('users/'+user).on('value', s => {
             balance = s.val() ? s.val().balance : 0;
             document.getElementById('userBalance').innerText = "₹" + balance.toFixed(2);
         });
-        // GAME HISTORY FIX: Force Load 20 Results
+    }
+
+    function loadHistory() {
         db.ref('gameHistory').limitToLast(20).on('value', s => {
-            let h = ""; let list = [];
+            let html = ""; let list = [];
             s.forEach(x => { list.unshift(x.val()); });
             list.forEach(x => {
-                let colorCode = x.color === 'Red' ? 'var(--red)' : (x.color === 'Green' ? 'var(--green)' : 'var(--violet)');
-                h += `<tr><td>${x.period}</td><td>${x.num}</td><td><span class="dot" style="background:${colorCode}"></span>${x.color}</td></tr>`;
+                let c = x.color === 'Red' ? '#e74c3c' : (x.color === 'Green' ? '#2ecc71' : '#9b59b6');
+                html += `<tr><td>${x.period}</td><td style="color:var(--gold)">${x.num}</td><td><span class="dot" style="background:${c}"></span>${x.color}</td></tr>`;
             });
-            document.getElementById('historyBody').innerHTML = h || "<tr><td colspan='3'>Waiting for results...</td></tr>";
-        });
-        db.ref('chats/'+user).on('value', s => {
-            let h = ""; s.forEach(m => { h += `<div style="text-align:${m.val().side=='Admin'?'left':'right'}"><p style="background:#333; display:inline-block; padding:5px 10px; border-radius:10px; margin:2px;">${m.val().msg}</p></div>`; });
-            document.getElementById('userChatBox').innerHTML = h;
+            document.getElementById('historyBody').innerHTML = html || "<tr><td colspan='3'>Game Starting...</td></tr>";
         });
     }
 
@@ -165,7 +165,7 @@
         } else { alert("Insufficient Balance!"); }
     }
 
-    async function calculateResult() {
+    async function generateResult() {
         let bets = (await db.ref('admin/totalBets').once('value')).val() || {Green:0, Red:0, Violet:0};
         let winner = "Green";
         if(bets.Red <= bets.Green && bets.Red <= bets.Violet) winner = "Red";
@@ -176,64 +176,43 @@
 
         if(currentBet && currentBet.color === winner) {
             db.ref('users/'+user).transaction(c => { return { balance: (c?c.balance:0) + (currentBet.amt * 1.9) }; });
-            alert("WINNER!");
         }
         db.ref('admin/totalBets').set({Green:0, Red:0, Violet:0});
         currentBet = null;
     }
 
-    // --- ADMIN PANEL FIX ---
     function handleAdminTap() {
         tapCount++;
         if(tapCount === 3) {
-            let pass = prompt("Admin Password:");
-            if(pass === "786786") {
-                document.getElementById('adminPanel').style.display = 'block';
-                loadAdminPanel();
+            if(prompt("Admin Pass:") === "786786") {
+                document.getElementById('adminPanel').style.display='block';
+                loadAdmin();
             }
             tapCount = 0;
         }
     }
 
-    function loadAdminPanel() {
+    function loadAdmin() {
         db.ref('admin').on('value', s => {
-            let data = s.val();
-            // Deposit List
-            let dHtml = "";
-            for(let key in data.depRequests) {
-                let r = data.depRequests[key];
-                dHtml += `<div class="admin-item">User: ${r.user} | ₹${r.a}<br>UTR: ${r.u} <button class="admin-btn" onclick="approveDep('${key}','${r.user}',${r.a})">APPROVE</button></div>`;
+            let data = s.val() || {};
+            let dH = "", wH = "";
+            for(let k in data.depRequests) {
+                let r = data.depRequests[k];
+                dH += `<div class="admin-item">User: ${r.user} | ₹${r.a}<br>UTR: ${r.u}<br><button class="admin-btn" onclick="approveDep('${k}','${r.user}',${r.a})">APPROVE</button></div>`;
             }
-            document.getElementById('depList').innerHTML = dHtml || "No Requests";
-
-            // Withdraw List
-            let wHtml = "";
-            for(let key in data.wdRequests) {
-                let r = data.wdRequests[key];
-                wHtml += `<div class="admin-item">User: ${r.user} | ₹${r.a}<br>UPI: ${r.upi} <button class="admin-btn" style="background:var(--red)" onclick="db.ref('admin/wdRequests/${key}').remove()">PAID</button></div>`;
+            for(let k in data.wdRequests) {
+                let r = data.wdRequests[k];
+                wH += `<div class="admin-item">User: ${r.user} | ₹${r.a}<br>UPI: ${r.upi}<br><button class="admin-btn" style="background:var(--red)" onclick="db.ref('admin/wdRequests/${k}').remove()">PAID</button></div>`;
             }
-            document.getElementById('wdList').innerHTML = wHtml || "No Requests";
-        });
-
-        // Chat List
-        db.ref('chats').on('value', s => {
-            let cHtml = "";
-            s.forEach(userChat => {
-                cHtml += `<div class="admin-item">User: ${userChat.key} <button class="admin-btn" onclick="adminReply('${userChat.key}')">REPLY</button></div>`;
-            });
-            document.getElementById('chatList').innerHTML = cHtml || "No Messages";
+            document.getElementById('depList').innerHTML = dH || "No Deposits";
+            document.getElementById('wdList').innerHTML = wH || "No Withdrawals";
         });
     }
 
-    function approveDep(key, u, a) {
+    function approveDep(k,u,a) {
         db.ref('users/'+u).transaction(c => { return { balance: (c?c.balance:0) + parseInt(a) }; });
-        db.ref('admin/depRequests/'+key).remove();
-        alert("Approved!");
-    }
-
-    function adminReply(u) {
-        let msg = prompt("Type Reply:");
-        if(msg) db.ref('chats/'+u).push({ side: 'Admin', msg: msg });
+        db.ref('admin/depRequests/'+k).remove();
+        alert("Paisa Add Ho Gaya!");
     }
 
     function submitDep() { 
@@ -242,15 +221,11 @@
     }
     function submitWd() { 
         let a = document.getElementById('wAmount').value, u = document.getElementById('wUpi').value;
-        if(a <= balance && a >= 200) { 
+        if(a >= 200 && balance >= a) { 
             db.ref('users/'+user).update({ balance: balance - a });
             db.ref('admin/wdRequests').push({ user, a, upi: u }); 
             alert("Withdraw Sent!"); closePop(); 
         } else { alert("Invalid Amount!"); }
-    }
-    function sendChat() {
-        let msg = document.getElementById('chatMsg').value;
-        if(msg) { db.ref('chats/'+user).push({ side: 'User', msg: msg }); document.getElementById('chatMsg').value = ""; }
     }
 </script>
 </body>
