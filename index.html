@@ -1,265 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
-<html lang="hi">
+<html b:css='false' b:defaultmessages='false' b:layoutsVersion='3' b:responsive='true' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/atom/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WinGold Pro - Official</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>1club - Official Color Prediction</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <style>
-        :root { --gold: #f1c40f; --dark: #0b141a; --card: #1c2c33; --green: #2ecc71; --red: #e74c3c; --violet: #9b59b6; --blue: #3498db; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 10px; text-align: center; }
-        .card { background: var(--card); padding: 15px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 500px; margin: 10px auto; border: 1px solid #33444d; }
+    <b:skin><![CDATA[ 
+        body { background: #0b0e11; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 60px; }
+        .app-container { max-width: 450px; margin: auto; background: #161a1e; min-height: 100vh; position: relative; }
         
-        /* Header & Balance */
-        .balance-card { background: linear-gradient(135deg, #1e3c72, #2a5298); padding: 25px; border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .balance-amt { font-size: 38px; font-weight: bold; color: var(--gold); cursor: pointer; text-shadow: 0 2px 10px rgba(241,196,15,0.3); }
+        /* 1club Gold Theme */
+        .header-balance { background: linear-gradient(135deg, #f0b90b 0%, #8a6d00 100%); padding: 30px 20px; border-radius: 0 0 40px 40px; text-align:center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .brand-logo { font-size: 24px; font-weight: 900; letter-spacing: 2px; color: #fff; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
         
-        /* Buttons */
-        .btn-bet { width: 30%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; color: white; cursor: pointer; font-size: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .green { background: var(--green); } .red { background: var(--red); } .violet { background: var(--violet); }
+        .card { margin: 15px; background: #21262c; border-radius: 15px; padding: 15px; text-align: center; border: 1px solid #2b3139; }
+        .btn-bet { flex: 1; padding: 12px; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-bet:active { transform: scale(0.95); }
+        .red { background: #f6465d; } .green { background: #2ebd85; }
         
-        /* Popups */
-        .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card); padding: 25px; border-radius: 25px; border: 2px solid var(--gold); z-index: 10000; width: 85%; max-width: 400px; box-shadow: 0 0 50px #000; }
-        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #33444d; background: #0b141a; color: white; font-size: 16px; text-align: center; }
+        /* Modal Design */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { background: #1e2329; width: 85%; padding: 25px; border-radius: 25px; text-align: center; border: 1px solid #f0b90b; }
         
-        /* Betting Options */
-        .mult-row { display: flex; justify-content: center; gap: 8px; margin: 15px 0; }
-        .mult-btn { padding: 8px 12px; background: #26353d; border: 1px solid #444; color: white; border-radius: 8px; cursor: pointer; font-size: 13px; }
-        .mult-btn.active { background: var(--gold); color: black; font-weight: bold; }
-
-        /* History Table */
-        .history-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; }
-        .history-table th { padding: 12px; color: #888; border-bottom: 1px solid #333; }
-        .history-table td { padding: 10px; border-bottom: 1px solid #222; }
-        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-
-        #adminPanel { display: none; background: #000; position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; z-index: 99999; padding: 20px; text-align: left; }
-    </style>
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #334155; background: #0b0e11; color: #f0b90b; box-sizing: border-box; text-align: center; font-size: 16px; }
+        .mult-btn { background: #334155; border: none; color: white; padding: 10px; border-radius: 8px; margin: 2px; flex: 1; font-weight: bold; }
+        .mult-btn.active { background: #f0b90b; color: #000; }
+        #admin-panel { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 10000; padding: 20px; overflow-y: auto; }
+    ]]></b:skin>
 </head>
 <body>
+    <b:section id='main' showaddelement='false'><b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' visible='true'/></b:section>
 
-<div id="loginBox" class="card" style="margin-top: 50px;">
-    <h1 style="color:var(--gold)">WINGOLD PRO</h1>
-    <input type="number" id="phone" placeholder="Mobile Number">
-    <input type="password" id="pin" placeholder="Security PIN">
-    <p style="color:var(--gold); font-size:13px; background:rgba(241,196,15,0.1); padding:10px; border-radius:10px; margin:15px 0;">
-        💡 Naye Player: PIN mein apne mobile number ke aakhri 5 digits dalein. Wahi aapki Game ID hai.
-    </p>
-    <button onclick="login()" style="width:100%; padding:15px; background:var(--gold); border:none; border-radius:12px; font-weight:bold; cursor:pointer;">ENTER GAME</button>
-</div>
+    <div id="login-page" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#0b0e11; z-index:5000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <h1 style="color:#f0b90b; font-size:45px; margin-bottom:10px;">1club</h1>
+        <p style="color:#929aa5; margin-bottom:30px;">Premium Color Prediction</p>
+        <input id="phone" placeholder="Mobile Number" style="max-width:300px; border:1px solid #f0b90b;" type="number" />
+        <button class="btn-bet" style="max-width:300px; background:#f0b90b; color:#000; width:100%;" onclick="login()">LOGIN / REGISTER</button>
+    </div>
 
-<div id="gameBox" style="display:none;">
-    <div class="balance-card">
-        <div style="font-size:14px; opacity:0.8;">Available Balance</div>
-        <div class="balance-amt" id="userBalance" onclick="handleAdminTap()">₹0.00</div>
-        <div style="margin-top:20px; display:flex; justify-content:center; gap:15px;">
-            <button onclick="showSec('depSec')" style="background:var(--green); color:white; border:none; padding:10px 25px; border-radius:10px; font-weight:bold;">Deposit</button>
-            <button onclick="showSec('wdSec')" style="background:var(--red); color:white; border:none; padding:10px 25px; border-radius:10px; font-weight:bold;">Withdraw</button>
+    <div class="app-container">
+        <div class="header-balance">
+            <div class="brand-logo">1CLUB</div>
+            <div style="font-size: 12px; opacity: 0.9; margin-top:5px;">Available Balance</div>
+            <div id="balance" onclick="triggerAdmin()" style="font-size: 36px; font-weight: 800; color:#fff;">₹0.00</div>
+            <div style="display:flex; gap:10px; margin-top:20px; padding: 0 10px;">
+                <button onclick="showModal('recharge-modal')" style="flex:1; padding:12px; border-radius:10px; border:none; background:#fff; font-weight:bold; color:#000;">DEPOSIT</button>
+                <button onclick="showModal('withdraw-modal')" style="flex:1; padding:12px; border-radius:10px; border:2px solid #fff; background:none; color:#fff; font-weight:bold;">WITHDRAW</button>
+            </div>
+        </div>
+
+        <div style="padding:10px 15px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; color:#929aa5;">Welcome to 1club!</span>
+            <button onclick="showModal('support-modal')" style="background:#374151; border:none; color:#fff; padding:5px 12px; border-radius:20px; font-size:11px;">24/7 Support</button>
+        </div>
+
+        <div class="card" style="background:rgba(240, 185, 11, 0.1); border:1px dashed #f0b90b;">
+            <h4 style="margin:0 0 5px 0; color:#f0b90b;">Share 1club &amp; Earn</h4>
+            <div id="invite-link" style="font-size:10px; color:#929aa5; margin-bottom:10px;">Login to generate link</div>
+            <button onclick="copyInvite()" style="background:#f0b90b; border:none; padding:8px 20px; border-radius:8px; font-weight:bold; color:#000;">Copy Invite Link</button>
+        </div>
+
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px; color:#929aa5; font-size:14px;">
+                <span>Period ID: <b id="periodId">---</b></span>
+                <span>Time Left: <b id="timer" style="color:#f0b90b;">60</b>s</span>
+            </div>
+            <div id="resultDisplay" style="font-size: 40px; margin-bottom: 20px; color:#f0b90b; font-weight:bold;">?</div>
+            <div style="display:flex; gap:15px;">
+                <button class="btn-bet red" onclick="openBetPopup('Red')">JOIN RED</button>
+                <button class="btn-bet green" onclick="openBetPopup('Green')">JOIN GREEN</button>
+            </div>
+        </div>
+
+        <div class="card" style="text-align: left;">
+            <h4 style="margin:0 0 10px 0; color:#f0b90b; border-bottom:1px solid #2b3139; padding-bottom:5px;">Recent History</h4>
+            <table style="width:100%; border-collapse: collapse; font-size:13px;">
+                <tbody id="history-body"></tbody>
+            </table>
         </div>
     </div>
 
-    <div class="card">
-        <div style="display:flex; justify-content:space-between; font-size:13px; color:#888;">
-            <span>Period: <b id="periodId" style="color:var(--gold)">--</b></span>
-            <span>CountDown: <b id="secs" style="color:var(--red)">60</b>s</span>
+    <div id="bet-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="betTitle">Join</h3>
+            <p style="font-size:12px; color:#aaa; margin-bottom:10px;">Manual Amount Entry</p>
+            <input id="baseAmount" oninput="updateTotal()" type="number" value="10"/>
+            <div style="display:flex; gap:5px; margin-bottom:20px;">
+                <button class="mult-btn active" id="m1" onclick="setMult(1, 'm1')">1x</button>
+                <button class="mult-btn" id="m5" onclick="setMult(5, 'm5')">5x</button>
+                <button class="mult-btn" id="m10" onclick="setMult(10, 'm10')">10x</button>
+                <button class="mult-btn" id="m100" onclick="setMult(100, 'm100')">100x</button>
+            </div>
+            <div style="font-size:20px; margin-bottom:20px;">Total Bet: <span id="totalBetLabel" style="color:#f0b90b; font-weight:bold;">₹10</span></div>
+            <button id="finalConfirmBtn" class="btn-bet" style="width:100%; padding:15px; font-size:18px;" onclick="confirmBet()">CONFIRM</button>
+            <button onclick="hideModal('bet-modal')" style="background:none; border:none; color:#aaa; margin-top:15px;">Cancel</button>
         </div>
-        <div style="display:flex; justify-content:space-around; margin:20px 0;">
-            <button class="btn-bet green" onclick="openBet('Green')">Join Green</button>
-            <button class="btn-bet violet" onclick="openBet('Violet')">Join Violet</button>
-            <button class="btn-bet red" onclick="openBet('Red')">Join Red</button>
-        </div>
-        <div style="display:flex; gap:10px;">
-            <button onclick="showSec('inviteSec')" style="flex:1; background:var(--blue); border:none; color:white; padding:12px; border-radius:10px; font-weight:bold;">Invite Friend</button>
-            <button onclick="showSec('suppSec')" style="flex:1; background:#444; border:none; color:white; padding:12px; border-radius:10px; font-weight:bold;">Support</button>
-        </div>
     </div>
 
-    <div class="card">
-        <h4 style="text-align:left; color:var(--gold); margin:0 0 10px 0;">Recent Game Results (Last 20)</h4>
-        <table class="history-table">
-            <thead><tr><th>Period</th><th>Num</th><th>Result</th></tr></thead>
-            <tbody id="historyBody"></tbody>
-        </table>
+    <div id="recharge-modal" class="modal"><div class="modal-content">
+        <h3>1club Deposit</h3>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&amp;data=upi://pay?pa=Poonamlondhe52-1@okhdfcbank%26pn=1club%26cu=INR" />
+        <input id="rechargeAmt" placeholder="Amount (Min ₹100)" type="number" />
+        <input id="utrNo" placeholder="12-Digit UTR Number" type="number" />
+        <button class="btn-bet green" style="width:100%;" onclick="submitRecharge()">SUBMIT DEPOSIT</button>
+        <button onclick="hideModal('recharge-modal')" style="background:none; border:none; color:#aaa; margin-top:10px;">Close</button>
+    </div></div>
+
+    <div id="withdraw-modal" class="modal"><div class="modal-content">
+        <h3>1club Withdraw</h3>
+        <input id="withAmt" placeholder="Amount (Min ₹200)" type="number" />
+        <input id="withUPI" placeholder="Your UPI ID" type="text" />
+        <button class="btn-bet red" style="width:100%;" onclick="submitWithdraw()">REQUEST WITHDRAW</button>
+        <button onclick="hideModal('withdraw-modal')" style="background:none; border:none; color:#aaa; margin-top:10px;">Close</button>
+    </div></div>
+
+    <div id="support-modal" class="modal"><div class="modal-content">
+        <h3 style="color:#f0b90b;">1club Support</h3>
+        <textarea id="compText" placeholder="Tell us your problem..." style="height:120px; text-align:left;"></textarea>
+        <button class="btn-bet green" style="width:100%;" onclick="submitComp()">SEND MESSAGE</button>
+        <button onclick="hideModal('support-modal')" style="background:none; border:none; color:#aaa; margin-top:10px;">Close</button>
+    </div></div>
+
+    <div id="admin-panel">
+        <h2 style="color:#f0b90b;">1club Admin</h2>
+        <button onclick="forcedRes='Red';alert('Forced: Red')" style="background:red; color:#fff; border:none; padding:15px; margin:5px; width:45%;">Force Red</button>
+        <button onclick="forcedRes='Green';alert('Forced: Green')" style="background:green; color:#fff; border:none; padding:15px; margin:5px; width:45%;">Force Green</button>
+        <button onclick="hideModal('admin-panel')" style="display:block; margin-top:40px; background:#334155; color:#fff; border:none; padding:10px 30px;">EXIT ADMIN</button>
     </div>
-</div>
 
-<div id="betModal" class="popup">
-    <h2 id="betTitle" style="margin-top:0;">Join Green</h2>
-    <div style="background:#0b141a; padding:15px; border-radius:15px;">
-        <p style="font-size:12px; color:#888; margin:0;">Enter Amount (₹)</p>
-        <input type="number" id="betAmtInput" value="10" style="font-size:24px; color:var(--gold); border:none; background:none;">
-    </div>
-    <div class="mult-row">
-        <button class="mult-btn" onclick="setMult(1)">1X</button>
-        <button class="mult-btn" onclick="setMult(2)">2X</button>
-        <button class="mult-btn" onclick="setMult(5)">5X</button>
-        <button class="mult-btn" onclick="setMult(10)">10X</button>
-        <button class="mult-btn" onclick="setMult(50)">50X</button>
-    </div>
-    <button onclick="confirmBet()" style="width:100%; padding:15px; background:var(--green); color:white; border:none; border-radius:15px; font-weight:bold; font-size:16px;">CONFIRM BET</button>
-    <button onclick="closePop()" style="background:none; border:none; color:#888; margin-top:15px; cursor:pointer;">CANCEL</button>
-</div>
+    <script type='text/javascript'>
+    //<![CDATA[
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrt3NnWu9vOeXHyirYEAjOitPXBswLFwU",
+            authDomain: "my-colour-game-670af.firebaseapp.com",
+            projectId: "my-colour-game-670af",
+            storageBucket: "my-colour-game-670af.firebasestorage.app",
+            messagingSenderId: "1098639199054",
+            appId: "1:1098639199054:web:b34a5aa3120ec0dbc5ac1f",
+            databaseURL: "https://my-colour-game-670af-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-<div id="winPop" class="popup">
-    <h1 style="color:var(--gold); font-size:40px; margin:0;">WIN! 🏆</h1>
-    <p style="font-size:20px;">You Received: <span id="winDisplayAmt" style="color:var(--green); font-weight:bold;">₹0</span></p>
-    <button onclick="closePop()" style="background:var(--gold); color:black; border:none; padding:12px 30px; border-radius:10px; font-weight:bold;">COLLECT</button>
-</div>
+        let balance = 0, timeLeft = 60, userPhone = "", selectedColor = "", selectedMult = 1, forcedRes = null, clickCount = 0;
 
-<div id="lossPop" class="popup">
-    <h2 style="color:var(--red);">BET LOST! ❌</h2>
-    <p id="lossMsg">Better luck next time!</p>
-    <button onclick="closePop()" style="background:#444; color:white; border:none; padding:10px 25px; border-radius:10px;">CLOSE</button>
-</div>
+        function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function hideModal(id) { document.getElementById(id).style.display = 'none'; }
 
-<div id="depSec" class="popup">
-    <h3>Deposit Fund</h3>
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=Poonamlondhe52-1@okhdfcbank&pn=WinGold&cu=INR" style="background:white; padding:10px; border-radius:10px; width:150px;">
-    <p style="font-size:13px;">UPI: <b style="color:var(--gold)">Poonamlondhe52-1@okhdfcbank</b></p>
-    <input type="number" id="dAmount" placeholder="Amount (₹)">
-    <input type="text" id="dUtr" placeholder="12 Digit UTR Number">
-    <button onclick="submitDep()" style="width:100%; background:var(--green); border:none; color:white; padding:12px; border-radius:10px; font-weight:bold;">SUBMIT PAYMENT</button>
-    <button onclick="closePop()" style="background:none; border:none; color:#888; margin-top:10px;">Close</button>
-</div>
+        function login() {
+            let ph = document.getElementById('phone').value;
+            if(ph.length == 10) {
+                userPhone = ph;
+                db.ref('users/' + ph).on('value', (snap) => {
+                    if(!snap.exists()) db.ref('users/' + ph).set({balance: 0, phone: ph});
+                    balance = snap.val().balance || 0;
+                    document.getElementById('balance').innerText = "₹" + balance.toFixed(2);
+                    document.getElementById('login-page').style.display = 'none';
+                    document.getElementById('invite-link').innerText = window.location.href.split('?')[0] + "?ref=" + ph;
+                });
+                loadHistory();
+            } else { alert("Enter Valid Phone Number"); }
+        }
 
-<div id="wdSec" class="popup">
-    <h3>Withdraw Money</h3>
-    <input type="number" id="wAmount" placeholder="Amount (Min ₹200)">
-    <input type="text" id="wUpi" placeholder="Your UPI ID">
-    <button onclick="submitWd()" style="width:100%; background:var(--red); border:none; color:white; padding:12px; border-radius:10px; font-weight:bold;">REQUEST WITHDRAW</button>
-    <button onclick="closePop()" style="background:none; border:none; color:#888; margin-top:10px;">Close</button>
-</div>
+        function openBetPopup(color) {
+            selectedColor = color; selectedMult = 1;
+            document.getElementById('betTitle').innerText = "Join " + color;
+            document.getElementById('betTitle').style.color = color == 'Red' ? '#f6465d' : '#2ebd85';
+            document.getElementById('finalConfirmBtn').style.backgroundColor = color == 'Red' ? '#f6465d' : '#2ebd85';
+            document.getElementById('baseAmount').value = 10;
+            document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('m1').classList.add('active');
+            updateTotal(); showModal('bet-modal');
+        }
 
-<div id="inviteSec" class="popup">
-    <h3>Refer & Earn</h3>
-    <div style="background:#0b141a; padding:20px; border-radius:15px;">
-        <p style="font-size:12px; margin:0;">Your Invite Code:</p>
-        <h2 id="refCodeDisp" style="color:var(--gold); letter-spacing:2px;">--</h2>
-    </div>
-    <p style="font-size:12px; color:#888;">Share your code and get 10% commission on every deposit!</p>
-    <button onclick="closePop()" style="background:var(--blue); border:none; color:white; padding:10px 20px; border-radius:10px;">OK</button>
-</div>
+        function setMult(m, id) {
+            selectedMult = m;
+            document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            updateTotal();
+        }
 
-<div id="suppSec" class="popup">
-    <h3>Support Center</h3>
-    <div id="chatBox" style="height:150px; background:#0b141a; overflow-y:auto; padding:10px; border-radius:10px; margin-bottom:10px; text-align:left; font-size:13px;"></div>
-    <input type="text" id="chatInput" placeholder="Enter message..." style="width:75%;">
-    <button onclick="sendMsg()" style="background:var(--blue); border:none; color:white; padding:10px; border-radius:5px;">Send</button>
-    <button onclick="closePop()" style="display:block; width:100%; margin-top:10px; background:none; border:none; color:#888;">Close</button>
-</div>
+        function updateTotal() {
+            let base = parseInt(document.getElementById('baseAmount').value) || 0;
+            document.getElementById('totalBetLabel').innerText = "₹" + (base * selectedMult);
+        }
 
-<div id="adminPanel">
-    <h2 style="color:var(--gold)">ADMIN MASTER DASHBOARD</h2>
-    <div id="adminBody"></div>
-    <button onclick="document.getElementById('adminPanel').style.display='none'" style="width:100%; padding:15px; background:white; color:black; font-weight:bold; border-radius:12px; margin-top:20px;">BACK TO GAME</button>
-</div>
+        function confirmBet() {
+            let base = parseInt(document.getElementById('baseAmount').value) || 0;
+            let total = base * selectedMult;
+            if(balance >= total && total >= 10) {
+                balance -= total; db.ref('users/' + userPhone).update({balance: balance});
+                alert("Bet Placed Successfully in 1club!"); hideModal('bet-modal');
+            } else { alert("Insufficient Balance!"); }
+        }
 
-<script>
-    const firebaseConfig = { databaseURL: "https://vlog-trading-default-rtdb.firebaseio.com/" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+        function submitRecharge() {
+            let a = document.getElementById('rechargeAmt').value;
+            let u = document.getElementById('utrNo').value;
+            if(a >= 100 && u.length == 12) {
+                db.ref('recharge_requests/' + u).set({phone: userPhone, amount: parseInt(a), status: 'pending'});
+                alert("Deposit Request Sent!"); hideModal('recharge-modal');
+            } else { alert("Minimum ₹100 and 12-digit UTR required."); }
+        }
 
-    let user = null, balance = 0, currentBet = null, tapCount = 0;
-    let period = 20260308001, timer = 60;
+        function submitWithdraw() {
+            let a = document.getElementById('withAmt').value;
+            let u = document.getElementById('withUPI').value;
+            if(a >= 200 && balance >= a) {
+                db.ref('withdraw_requests/' + Date.now()).set({phone:userPhone, amount:parseInt(a), upi:u, status:'pending'});
+                balance -= a; db.ref('users/' + userPhone).update({balance: balance});
+                alert("Withdrawal Requested!"); hideModal('withdraw-modal');
+            } else { alert("Minimum ₹200 or Low Balance."); }
+        }
 
-    function login() {
-        let p = document.getElementById('phone').value;
-        if(p.length < 10) return alert("Sahi number dalein");
-        user = p; document.getElementById('loginBox').style.display='none'; document.getElementById('gameBox').style.display='block';
-        document.getElementById('refCodeDisp').innerText = "WG" + p.slice(-4);
-        loadUser(); startSystem();
-    }
-
-    function startSystem() {
-        setInterval(() => {
-            timer--;
-            if(timer <= 0) { calculateResult(); timer = 60; period++; }
-            document.getElementById('secs').innerText = timer;
-            document.getElementById('periodId').innerText = period;
-        }, 1000);
-        loadHistory();
-    }
-
-    function loadUser() {
-        db.ref('users/'+user).on('value', s => {
-            balance = s.val() ? s.val().balance : 0;
-            document.getElementById('userBalance').innerText = "₹" + balance.toFixed(2);
-        });
-        db.ref('chats/'+user).on('value', s => {
-            let h = ""; s.forEach(m => { h += `<div style="text-align:${m.val().sender=='Admin'?'left':'right'}"><span style="background:${m.val().sender=='Admin'?'#444':'#2a5298'}; padding:5px 10px; border-radius:10px; display:inline-block; margin-bottom:5px;">${m.val().txt}</span></div>`; });
-            document.getElementById('chatBox').innerHTML = h;
-            document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
-        });
-    }
-
-    function loadHistory() {
-        db.ref('gameHistory').limitToLast(20).on('value', s => {
-            let h = ""; let data = []; s.forEach(x => { data.unshift(x.val()); });
-            data.forEach(x => { 
-                let col = x.color === 'Red' ? 'var(--red)' : (x.color === 'Green' ? 'var(--green)' : 'var(--violet)');
-                h += `<tr><td>${x.period}</td><td style="font-weight:bold;">${x.num}</td><td><span class="dot" style="background:${col}"></span>${x.color}</td></tr>`; 
-            });
-            document.getElementById('historyBody').innerHTML = h;
-        });
-    }
-
-    function openBet(col) { currentBetColor = col; document.getElementById('betTitle').innerText = "Join " + col; document.getElementById('betModal').style.display='block'; }
-    function setMult(m) { document.getElementById('betAmtInput').value = 10 * m; }
-    function closePop() { document.querySelectorAll('.popup').forEach(p => p.style.display='none'); }
-
-    function confirmBet() {
-        let amt = parseInt(document.getElementById('betAmtInput').value);
-        if(balance >= amt && amt > 0) {
-            db.ref('users/'+user).update({ balance: balance - amt }); // WALLET CUT
-            db.ref('admin/totalBets/'+currentBetColor).transaction(c => (c || 0) + amt);
-            currentBet = { color: currentBetColor, amt: amt };
-            closePop(); alert("Bet Success!");
-        } else { alert("Balance kam hai!"); }
-    }
-
-    async function calculateResult() {
-        let bets = (await db.ref('admin/totalBets').once('value')).val() || {Green:0, Red:0, Violet:0};
-        let winner = "Green";
-        if(bets.Red <= bets.Green && bets.Red <= bets.Violet) winner = "Red";
-        else if(bets.Violet <= bets.Green && bets.Violet <= bets.Red) winner = "Violet";
-        
-        let num = Math.floor(Math.random() * 10);
-        db.ref('gameHistory').push({ period: period, color: winner, num: num });
-
-        if(currentBet) {
-            if(currentBet.color === winner) {
-                let winAmt = currentBet.amt * 1.95;
-                db.ref('users/'+user).transaction(c => { return { balance: (c?c.balance:0) + winAmt }; });
-                document.getElementById('winDisplayAmt').innerText = "₹" + winAmt.toFixed(2);
-                document.getElementById('winPop').style.display='block';
-            } else {
-                document.getElementById('lossMsg').innerText = "Result was " + winner;
-                document.getElementById('lossPop').style.display='block';
+        function submitComp() {
+            let m = document.getElementById('compText').value;
+            if(m.length > 5) {
+                db.ref('complaints/' + Date.now()).set({phone: userPhone, msg: m, status: 'pending'});
+                alert("Support Message Sent!"); hideModal('support-modal');
             }
         }
-        db.ref('admin/totalBets').set({Green:0, Red:0, Violet:0});
-        currentBet = null;
-    }
 
-    function showSec(id) { document.getElementById(id).style.display='block'; }
-    function submitDep() { let a = document.getElementById('dAmount').value, u = document.getElementById('dUtr').value; if(a && u) { db.ref('admin/depRequests').push({ user, a, u }); alert("Deposit Sent!"); closePop(); } }
-    function submitWd() { let a = document.getElementById('wAmount').value, u = document.getElementById('wUpi').value; if(a <= balance && a >= 200) { db.ref('users/'+user).update({ balance: balance-a }); db.ref('admin/wdRequests').push({ user, a, upi: u }); alert("Withdraw Sent!"); closePop(); } }
-    function sendMsg() { let t = document.getElementById('chatInput').value; if(t) { db.ref('chats/'+user).push({ sender: 'User', txt: t }); document.getElementById('chatInput').value=""; } }
+        function loadHistory() {
+            db.ref('game_history').limitToLast(15).on('value', (snap) => {
+                let html = '';
+                snap.forEach(c => {
+                    let color = c.val() == 'Red' ? '#f6465d' : '#2ebd85';
+                    html = `<tr><td style="padding:10px; border-bottom:1px solid #2b3139; color:#929aa5;">Period #${c.key}</td><td style="color:${color}; font-weight:bold; text-align:right; padding:10px;">${c.val()}</td></tr>` + html;
+                });
+                document.getElementById('history-body').innerHTML = html;
+            });
+        }
 
-    function handleAdminTap() { tapCount++; if(tapCount === 3) { if(prompt("Pass:")==="786786") { document.getElementById('adminPanel').style.display='block'; loadAdmin(); } tapCount=0; } }
-    function loadAdmin() {
-        db.ref('admin').on('value', s => {
-            let d = s.val(), h = "<h3>Pending Deposits</h3>";
-            for(let k in d.depRequests) h += `<div style='background:#1a1a1a; padding:15px; margin-bottom:10px; border-left:4px solid var(--green)'>${d.depRequests[k].user}: ₹${d.depRequests[k].a} (UTR:${d.depRequests[k].u}) <button onclick="appDep('${k}','${d.depRequests[k].user}',${d.depRequests[k].a})">Approve</button></div>`;
-            h += "<h3>Withdrawals</h3>";
-            for(let k in d.wdRequests) h += `<div style='background:#1a1a1a; padding:15px; margin-bottom:10px; border-left:4px solid var(--red)'>${d.wdRequests[k].user}: ₹${d.wdRequests[k].a} to ${d.wdRequests[k].upi} <button onclick="db.ref('admin/wdRequests/${k}').remove()">Mark Paid</button></div>`;
-            h += "<h3>Customer Support</h3>";
-            db.ref('chats').once('value', cs => { cs.forEach(c => { h += `<div style='background:#1a1a1a; padding:10px; margin-bottom:5px;'>User: ${c.key} <button onclick="replyChat('${c.key}')">Reply</button></div>`; }); document.getElementById('adminBody').innerHTML = h; });
-        });
-    }
-    function appDep(k,u,a) { db.ref('users/'+u).transaction(c => { return { balance: (c?c.balance:0) + parseInt(a) }; }); db.ref('admin/depRequests/'+k).remove(); }
-    function replyChat(u) { let m = prompt("Reply:"); if(m) db.ref('chats/'+u).push({ sender: 'Admin', txt: m }); }
-</script>
+        function triggerAdmin() {
+            clickCount++;
+            if(clickCount >= 5) {
+                let p = prompt("Admin Key:");
+                if(p == "77759636477") showModal('admin-panel');
+                clickCount = 0;
+            }
+        }
+
+        setInterval(() => {
+            if(timeLeft > 0) { timeLeft--; document.getElementById('timer').innerText = timeLeft; }
+            else {
+                let win = forcedRes || (Math.random() > 0.5 ? 'Red' : 'Green');
+                let pid = Date.now().toString().slice(-6);
+                db.ref('game_history/' + pid).set(win);
+                document.getElementById('periodId').innerText = pid;
+                timeLeft = 60; forcedRes = null;
+            }
+        }, 1000);
+
+        function copyInvite() {
+            let link = document.getElementById('invite-link').innerText;
+            navigator.clipboard.writeText(link).then(() => alert("1club Invite Link Copied!"));
+        }
+    //]]>
+    </script>
 </body>
 </html>
