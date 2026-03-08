@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Game Portal</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f2027; color: white; text-align: center; margin: 0; padding: 20px; }
+        .card { background: #203a43; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); max-width: 400px; margin: auto; }
+        input { width: 80%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
+        button { background: #2c5364; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        #adminPanel { display: none; background: #1a1a1a; padding: 20px; margin-top: 20px; border: 2px solid gold; }
+        .balance-box { font-size: 24px; color: #00ff00; cursor: pointer; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="loginBox">
+        <h2>Login / Signup</h2>
+        <input type="number" id="phone" placeholder="Mobile Number">
+        <input type="password" id="pin" placeholder="Last 5 Digits of Mobile (PIN)">
+        <br>
+        <button onclick="login()">Enter Game</button>
+    </div>
+
+    <div id="gameBox" style="display:none;">
+        <div class="card">
+            <h3>Welcome to Game</h3>
+            <div class="balance-box" id="userBalance" onclick="handleAdminTap()">Balance: ₹0.00</div>
+            <button onclick="showDeposit()">Deposit Money</button>
+            <button onclick="logout()" style="background:red;">Logout</button>
+        </div>
+    </div>
+
+    <div id="adminPanel">
+        <h3>Admin Dashboard</h3>
+        <div id="requests">Loading requests...</div>
+        <button onclick="closeAdmin()">Close Panel</button>
+    </div>
+
+    <script>
+        // Firebase Config (Aapki purani settings ke hisab se)
+        const firebaseConfig = {
+            databaseURL: "https://vlog-trading-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let tapCount = 0;
+        let currentUser = null;
+
+        function login() {
+            let phone = document.getElementById('phone').value;
+            let pin = document.getElementById('pin').value;
+            if(phone.length < 10) { alert("Sahi number dalein"); return; }
+            
+            currentUser = phone;
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('gameBox').style.display = 'block';
+            loadUserData();
+        }
+
+        function loadUserData() {
+            db.ref('users/' + currentUser).on('value', (snap) => {
+                let data = snap.val();
+                document.getElementById('userBalance').innerText = "Balance: ₹" + (data ? data.balance : "0.00");
+            });
+        }
+
+        function handleAdminTap() {
+            tapCount++;
+            if(tapCount === 3) {
+                let pass = prompt("Admin Password Dalein:");
+                if(pass === "786786786") {
+                    document.getElementById('adminPanel').style.display = 'block';
+                    loadAdminRequests();
+                }
+                tapCount = 0;
+            }
+        }
+
+        function loadAdminRequests() {
+            db.ref('deposits').on('value', (snap) => {
+                let data = snap.val();
+                let html = "";
+                for(let id in data) {
+                    html += `<p>${data[id].user}: ₹${data[id].amount} (UTR: ${data[id].utr}) 
+                    <button onclick="approve('${id}', '${data[id].user}', ${data[id].amount})">Approve</button></p>`;
+                }
+                document.getElementById('requests').innerHTML = html || "No pending requests";
+            });
+        }
+
+        function approve(id, user, amt) {
+            db.ref('users/' + user).transaction(current => {
+                return { balance: (current ? current.balance : 0) + amt };
+            });
+            db.ref('deposits/' + id).remove();
+            alert("Approved!");
+        }
+
+        function logout() { location.reload(); }
+        function closeAdmin() { document.getElementById('adminPanel').style.display = 'none'; }
+    </script>
+</body>
+</html>
