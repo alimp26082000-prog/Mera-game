@@ -53,12 +53,41 @@
     </div>
 </div>
 
-<div id="adminPanel" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:2000; overflow-y:auto; padding:20px; text-align:left;">
-    <h2 style="color:#f1c40f;">ADMIN CONTROL</h2>
-    <div id="adminData">Loading...</div>
-    <button onclick="document.getElementById('adminPanel').style.display='none'" style="width:100%; padding:15px; margin-top:20px;">BACK</button>
-</div>
-
+function loadAdmin() {
+    const adminRef = db.ref('admin');
+    adminRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        let html = "<h3 style='color:#f1c40f'>Pending Deposits</h3>";
+        
+        if (data && data.depRequests) {
+            for (let key in data.depRequests) {
+                let req = data.depRequests[key];
+                html += `<div style='background:#222; padding:10px; margin-bottom:5px; border-radius:8px;'>
+                            User: ${req.user} | Amt: ₹${req.a} | UTR: ${req.u} 
+                            <button onclick="appDep('${key}','${req.user}',${req.a})" style='background:#2ecc71; border:none; color:white; padding:5px; border-radius:5px; margin-left:10px;'>Approve</button>
+                         </div>`;
+            }
+        } else {
+            html += "<p style='color:#888'>No Pending Deposits</p>";
+        }
+        
+        // Withdrawals Section
+        html += "<h3 style='color:#f1c40f; margin-top:20px;'>Withdraw Requests</h3>";
+        if (data && data.wdRequests) {
+            for (let key in data.wdRequests) {
+                let w = data.wdRequests[key];
+                html += `<div style='background:#222; padding:10px; margin-bottom:5px; border-radius:8px;'>
+                            User: ${w.user} | Amt: ₹${w.a} | UPI: ${w.upi}
+                            <button onclick="db.ref('admin/wdRequests/${key}').remove()" style='background:#e74c3c; border:none; color:white; padding:5px; border-radius:5px; margin-left:10px;'>Done/Paid</button>
+                         </div>`;
+            }
+        } else {
+            html += "<p style='color:#888'>No Withdraw Requests</p>";
+        }
+        
+        document.getElementById('adminData').innerHTML = html;
+    });
+}
 <div id="depSec" class="popup">
     <h3>Deposit</h3>
     <p>UPI: <b>Poonamlondhe52-1@okhdfcbank</b></p>
@@ -77,10 +106,82 @@
 </div>
 
 <script>
-    // Config: Ensure this URL matches your Firebase exactly
-    const firebaseConfig = { databaseURL: "https://vlog-trading-default-rtdb.firebaseio.com/" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+// --- RESULTS & HISTORY LOGIC ---
+
+function loadHistory() {
+    // Game History se pichhle 20 result uthana
+    db.ref('gameHistory').limitToLast(20).on('value', (snapshot) => {
+        const historyBody = document.getElementById('historyBody');
+        let html = "";
+        let results = [];
+
+        if (snapshot.exists()) {
+            snapshot.forEach((child) => {
+                results.unshift(child.val()); // Naya result sabse upar dikhane ke liye
+            });
+
+            results.forEach((data) => {
+                // Color ke hisaab se dot ka rang taiyar karna
+                let dotColor = data.color === 'Red' ? '#e74c3c' : (data.color === 'Green' ? '#2ecc71' : '#9b59b6');
+                
+                html += `<tr>
+                    <td>${data.period}</td>
+                    <td style="font-weight:bold; color:#f1c40f;">${data.num}</td>
+                    <td>
+                        <span style="height:10px; width:10px; background:${dotColor}; border-radius:50%; display:inline-block; margin-right:5px;"></span>
+                        <span style="color:${dotColor}; font-weight:bold;">${data.color}</span>
+                    </td>
+                </tr>`;
+            });
+            historyBody.innerHTML = html;
+        } else {
+            historyBody.innerHTML = "<tr><td colspan='3' style='color:#888;'>Waiting for next result...</td></tr>";
+        }
+    });
+}
+
+// --- AUTO RESULT GENERATOR (Har 1 Min mein chalega) ---
+async function calculateResult() {
+    // 1. Betting ka data uthana
+    let bets = (await db.ref('admin/totalBets').once('value')).val() || {Green:0, Red:0, Violet:0};
+    
+    // 2. SMART LOGIC: Jis color par kam paisa hai wahi jitega
+    let winner = "Green";
+    if(bets.Red <= bets.Green && bets.Red <= bets.Violet) {
+        winner = "Red";
+    } else if(bets.Violet <= bets.Green && bets.Violet <= bets.Red) {
+        winner = "Violet";
+    }
+
+    let luckyNum = (winner === "Green") ? 1 : (winner === "Red" ? 2 : 0);
+
+    // 3. Database mein result save karna
+    const newResult = {
+        period: period,
+        color: winner,
+        num: luckyNum,
+        time: new Date().getTime()
+    };
+
+    db.ref('gameHistory').push(newResult);
+
+    // 4. Betting reset karna naye round ke liye
+    db.ref('admin/totalBets').set({Green:0, Red:0, Violet:0});
+    
+    // 5. User ko Win/Loss dikhana agar usne bet lagayi ho
+    if(hasBet) {
+        if(hasBet.color === winner) {
+            let winAmt = hasBet.amt * 1.9;
+            db.ref('users/'+user).transaction(c => {
+                return { balance: (c ? c.balance : 0) + winAmt };
+            });
+            alert("🏆 CONGRATS! You won ₹" + winAmt.toFixed(2));
+        } else {
+            alert("❌ Hard Luck! Result was " + winner);
+        }
+        hasBet = false;
+    }
+    }
 
     let user = null, balance = 0, tapCount = 0;
     let period = 20260308001, timer = 60;
@@ -150,3 +251,4 @@
 </script>
 </body>
 </html>
+
